@@ -1,11 +1,12 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { color_divider } from "../../../colors";
+import { color_divider, color_primary_color } from "../../../colors";
 
 const DIVIDER_WIDTH = 0.5;
 const ROW_HEIGHT = 60;
 
 interface DigitalInputProps {
     onClickCallback?: Function; // callback parameter (gridType, text)
+    doneText?: string; 
 }
 
 export enum GridType {
@@ -106,17 +107,28 @@ function DigitalInput(props: DigitalInputProps) {
 
     const { width: screenWidth } = useWindowDimensions();
     const everWidth = (screenWidth - DIVIDER_WIDTH * 3) / 4;
-    const { onClickCallback } = props;
+    const { onClickCallback, doneText } = props;
 
     function _renderCell(value: any) {
         const { type, text } = value || {};
+        let textContent = text;
+        let style_option = {};
+        let style_container_option = {};
+        if (type === GridType.GRID_ADD || type === GridType.GRID_SUBTRACT) {
+            style_option = { fontSize: 25 };
+        } 
+        if (type === GridType.GRID_DONE){
+            style_container_option = { backgroundColor: color_primary_color };
+            textContent = doneText;
+        }
+        
         return (
             <TouchableOpacity onPress={() => {
                 // Alert.alert(text);
                 onClickCallback && onClickCallback(type, text);
             }}>
-                <View style={{ height: ROW_HEIGHT, width: everWidth, justifyContent: 'center', alignItems: 'center' }}>
-                    <Text>{text}</Text>
+                <View style={[{ height: ROW_HEIGHT, width: everWidth, justifyContent: 'center', alignItems: 'center' }, style_container_option]}>
+                    <Text style={[{ fontSize: 20, fontWeight: '400' }, style_option]}>{textContent}</Text>
                 </View>
             </TouchableOpacity>
         );

@@ -2,7 +2,7 @@ import { Modal, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-na
 import { FlexableModal, FlexableType } from "../../components/FlexableModal";
 import { useReducer, useState } from "react";
 import DigitalInput, { GridType } from "./components/digital_input";
-import homeReducer, { initState } from './reducer';
+import homeReducer, { DoneButtonState, initState } from './reducer';
 import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./components/action";
 
 // >>>>>> const area start >>>>>>>
@@ -14,7 +14,7 @@ const BUTTON_SIZE = 50;
 function HomePage() {
 
     const [ state, dispatch ] = useReducer(homeReducer, initState);
-    const { costMoney, isShowDigitalInput } = state || {};
+    const { costMoney, isShowDigitalInput, doneButtonState } = state || {};
 
     function _renderAddButton() {
         return (
@@ -46,20 +46,24 @@ function HomePage() {
     }
 
     function _renderModalContent() {
+        const doneText = doneButtonState === DoneButtonState.DONE ? "完成" : "=";
         return (
             <View style={{ flexDirection: 'column', width: '100%' }}>
-                <DigitalInput onClickCallback={(gridType: GridType, text: string) => {
-                    dispatch({ type: ACTION_HOME_DEAL_INPUT, playload: { gridType } });
-                }}/>
+                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 20, marginBottom: 10 }}>
+                    <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
+                </View>
+                <DigitalInput 
+                    doneText={doneText}
+                    onClickCallback={(gridType: GridType, text: string) => {
+                        dispatch({ type: ACTION_HOME_DEAL_INPUT, playload: { gridType } });
+                    }}
+                />
             </View>
         );
     }
 
     return (
         <View style={styles.style_home_container}>
-            <View style={{ marginTop: 50 }}>
-                <Text>{costMoney}</Text>
-            </View>
             {_renderModal()}
             {_renderAddButton()}
         </View>
