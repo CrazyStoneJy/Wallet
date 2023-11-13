@@ -82,6 +82,9 @@ function dealInput(state: any, playload: any) {
 }
 
 function dealZeroOperation(costMoney: string) {
+    if (costMoney === '0') {
+        return costMoney;
+    }
     return costMoney + '0';
 }
 
@@ -200,7 +203,10 @@ function dealSubtractOperation(costMoney: string) {
 }
 
 // 进位
-function carryDigital(num: number, digital: number) {
-    console.log("num: ", num, ", digital: ", digital);
-    return num + digital;
+function carryDigital(costMoney: string, digital: number) {
+    if (costMoney === '0') {
+        return digital + "";
+    }
+    // console.log("costMoney: ", costMoney, ", digital: ", digital);
+    return costMoney + digital;
 }
