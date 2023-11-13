@@ -1,6 +1,7 @@
+import { ITask, Task } from './task';
 class StorageTask extends Task {
 
-    run(): Promise<ITask> {
+    run(): Promise<ITask | number> {
         return super.run();
     }
 }

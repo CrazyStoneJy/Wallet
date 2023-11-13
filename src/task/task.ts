@@ -4,7 +4,7 @@
  */
 
 const TASK_END_FLAG = 1;
-interface ITask {
+export interface ITask {
     // taskId: number;
     init(): void;
     run(): Promise<ITask | number>;
@@ -69,7 +69,7 @@ enum TaskState {
     DONE = 3
 }
 
-abstract class Task implements ITask {
+export abstract class Task implements ITask {
 
     public taskName: string = '';
     protected state: TaskState = TaskState.DEAFULT;
