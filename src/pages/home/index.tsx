@@ -1,9 +1,9 @@
-import { Modal, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { Modal, StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList } from "react-native";
 import { FlexableModal, FlexableType } from "../../components/FlexableModal";
 import { useReducer, useState } from "react";
 import DigitalInput, { GridType } from "./components/digital_input";
-import homeReducer, { DoneButtonState, initState } from './reducer';
-import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./components/action";
+import calulatorReducer, { DoneButtonState, initState } from './calulator_reducer';
+import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 
 // >>>>>> const area start >>>>>>>
 
@@ -13,7 +13,7 @@ const BUTTON_SIZE = 50;
 
 function HomePage() {
 
-    const [ state, dispatch ] = useReducer(homeReducer, initState);
+    const [ state, dispatch ] = useReducer(calulatorReducer, initState);
     const { costMoney, isShowDigitalInput, doneButtonState } = state || {};
 
     function _renderAddButton() {
@@ -56,14 +56,34 @@ function HomePage() {
                     doneText={doneText}
                     onClickCallback={(gridType: GridType, text: string) => {
                         dispatch({ type: ACTION_HOME_DEAL_INPUT, playload: { gridType } });
+                        if (gridType === GridType.GRID_DONE && doneButtonState === DoneButtonState.DONE) {
+                            // Alert.alert("costMoney: " + costMoney);
+                        }
                     }}
                 />
             </View>
         );
     }
 
+    function _renderCostListItem({ item, index }: any ) {
+        return (
+            <View style={{ flexDirection: 'row' }}>
+                <Text></Text>    
+            </View>
+        );
+    }
+
+    function _renderCostListByDay() {
+        return (
+            <View style={{ flex: 1, flexDirection: 'column' }}>
+                <FlatList data={[]} renderItem={_renderCostListItem}/>
+            </View>
+        );
+    }
+
     return (
         <View style={styles.style_home_container}>
+            {_renderCostListByDay()}
             {_renderModal()}
             {_renderAddButton()}
         </View>

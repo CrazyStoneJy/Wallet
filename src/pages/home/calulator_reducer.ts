@@ -1,5 +1,5 @@
 import { safeParseFloat, safeParseInt } from "../../utils/safe_invoker";
-import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./components/action";
+import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 import { GridType } from "./components/digital_input";
 
 export enum DoneButtonState {
@@ -75,11 +75,20 @@ function dealInput(state: any, playload: any) {
         case GridType.GRID_DOT:
             costMoney = addDotOperation(costMoney);
             return { ...state, costMoney };
+        case GridType.GRID_ZERO:
+            costMoney = dealZeroOperation(costMoney);
+            return { ...state, costMoney };
     }
+}
+
+function dealZeroOperation(costMoney: string) {
+    return costMoney + '0';
 }
 
 function calulateOperation(costMoney: string) {
     const expressionSymbol = getExpressionSymbol(costMoney);
+    console.log(">>>expressionSymbol: ", expressionSymbol);
+    
     if (!expressionSymbol) {
         return costMoney;
     }
@@ -131,7 +140,6 @@ function dealMathOperation(costMoney: string, operationType: OperationType): str
         if (!expressionSymbol) {
             return costMoney;
         }
-        console.log("expressionSymbol: ", expressionSymbol, ", opertationSymbol: ", opertationSymbol);
         // todo how to calculate negative number.
         const operationNumbers = costMoney.split(expressionSymbol);
         if (operationNumbers && operationNumbers.length === 2) {
@@ -154,7 +162,7 @@ function getExpressionSymbol(costMoney: string): string | undefined {
 function getDicimalBase(num: number) {
     let temp = num.toString();
     let array = temp.split(".");
-    return array[1].length;
+    return array[1] ? array[1].length : 0;
 }
 
 function calculate(num1: number, num2: number, symbol: string) {

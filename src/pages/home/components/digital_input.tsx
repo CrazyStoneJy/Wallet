@@ -93,7 +93,7 @@ const grid = [
             type: GridType.GRID_ZERO
         },
         {
-            text: 'BACK',
+            text: 'C',
             type: GridType.GRID_BACK
         },
         {

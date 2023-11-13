@@ -9,3 +9,6 @@ for (let e of array) {
 console.log(1.0.toFixed(2));
 console.log(Number.isInteger(10));
 console.log("1".length);
+
+
+console.log(parseFloat('003'));
