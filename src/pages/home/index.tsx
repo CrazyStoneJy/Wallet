@@ -1,9 +1,10 @@
 import { Modal, StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList } from "react-native";
 import { FlexableModal, FlexableType } from "../../components/FlexableModal";
-import { useReducer, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import DigitalInput, { GridType } from "./components/digital_input";
 import calulatorReducer, { DoneButtonState, initState } from './calulator_reducer';
 import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
+import sqliteHelper from "../../db/sqlite_helper";
 
 // >>>>>> const area start >>>>>>>
 
@@ -15,6 +16,11 @@ function HomePage() {
 
     const [ state, dispatch ] = useReducer(calulatorReducer, initState);
     const { costMoney, isShowDigitalInput, doneButtonState } = state || {};
+     
+
+    // useEffect(() => {
+    //     sqliteHelper.connect();
+    // }, []);
 
     function _renderAddButton() {
         return (

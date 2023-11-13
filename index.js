@@ -13,4 +13,7 @@ import SQLite from 'react-native-sqlite-storage';
 SQLite.DEBUG(true);
 SQLite.enablePromise(false);
 
+const isHermes = () => !!global.HermesInternal;
+console.log("is open hermes: ", isHermes());
+
 AppRegistry.registerComponent(appName, () => App);
