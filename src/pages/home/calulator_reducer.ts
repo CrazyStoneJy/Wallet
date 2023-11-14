@@ -21,20 +21,20 @@ enum OperationType {
 const operationSymbols = [ '+', '-' ];
 
 export default function reducer(state: any, action: any) {
-    const { type, playload } = action || {};
+    const { type, payload } = action || {};
     switch (type) {
         case ACTION_HOME_DEAL_INPUT:
-            const dealedState = dealInput(state, playload);
+            const dealedState = dealInput(state, payload);
             return { ...state, ...dealedState };
         case ACTION_REFRESH_DIGITAL_INPUT_STATE:
-            const { isShow } = playload || {};
+            const { isShow } = payload || {};
             return { ...state, isShowDigitalInput: isShow };
     }
 }
 
-function dealInput(state: any, playload: any) {
+function dealInput(state: any, payload: any) {
     let { costMoney, isShowDigitalInput } = state || {};
-    const { gridType } = playload || {};
+    const { gridType } = payload || {};
     let doneState = DoneButtonState.DONE;
     switch (gridType) {
         case GridType.GRID_1:
