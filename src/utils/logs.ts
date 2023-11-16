@@ -1,13 +1,18 @@
 
 const dbLogInfo = {
-    isDebug: true,
+    isDebug: false,
     tag: 'db'
 };
 
 const defaulutInfo = {
-    isDebug: false,
+    isDebug: true,
     tag: 'tag'
 }
+
+const taskInfo = {
+    isDebug: true,
+    tag: 'task'
+};
 
 function XLog() {
 
@@ -25,9 +30,17 @@ function XLog() {
         }
     }
 
+    function logT(...message: any[]) {
+        const { tag, isDebug } = taskInfo;
+        if (isDebug) {
+            console.log(`>>>${tag} `, message);
+        }
+    }
+
     return {
         logDB,
-        log
+        log,
+        logT
     }
 
 }

@@ -65,12 +65,13 @@ function StorageAccessManager() {
 
     }
 
-    function queryData(sqlString: string, parameters: any[]) {
+    function queryData(sqlString: string, parameters: any[], successCallback: Function) {
         xLog.logDB(`query sql string: ${sqlString}`);
         xLog.logDB(`query parameters: `, parameters);
         sqliteHelper.getDB((db: any) => {
-            db.executeSql(sqlString, [ ...parameters ], () => {
+            db.executeSql(sqlString, [ ...parameters ], (results: any) => {
                 xLog.logDB(`query successfully.`);
+                successCallback && successCallback(results);
             }, (error: any) => {
                 xLog.logDB(`query has been occur error, error info: `, error);
             });

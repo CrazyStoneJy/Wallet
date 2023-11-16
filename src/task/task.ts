@@ -3,6 +3,8 @@
  * implment an async task structure.
  */
 
+import xLog from "../utils/logs";
+
 const TASK_END_FLAG = 1;
 export interface ITask {
     // taskId: number;
@@ -43,6 +45,7 @@ export class TaskManager {
             console.log("no task can be execute");
             return;
         }
+        xLog.logT("task manager execute.");
         for (const task of this.tasks) {
             task.execute();
         }
@@ -53,7 +56,7 @@ export class TaskManager {
             console.log("no task can be execute");
             return;
         }
-        console.log("task manager init.");
+        xLog.logT("task manager init.");
         for (const task of this.tasks) {
             task.init();
         }
@@ -78,15 +81,19 @@ export abstract class Task implements ITask {
         this.state = TaskState.INITED;
     }
 
+    /**
+     * todo 
+     * here should be recursively to execute promise function.
+     */
     execute(): void {
         this.state = TaskState.RUNNING
         this.run()
-            .then(() => {
+            .then((doneFlag: any) => {
                 this.state = TaskState.DONE;
-                console.log(`${this.taskName} finished successfully.`);
+                xLog.logT(`${this.taskName} finished successfully.`);
             })
             .catch((error) => {
-                console.log(`${this.taskName} has been occure some error, ${error}`);
+                xLog.logT(`${this.taskName} has been occure some error, `,error);
             })
     }
 

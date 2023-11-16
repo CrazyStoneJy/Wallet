@@ -1,17 +1,20 @@
-import { safeParseFloat, safeParseInt } from "../../utils/safe_invoker";
-import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
+import { safeParseFloat } from "../../utils/safe_invoker";
+import { ACTION_ADD_COST_ITEM, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 import { GridType } from "./components/digital_input";
+import { Action } from "./home_reducer";
 
 export enum DoneButtonState {
     CALCULATE = 1,
     DONE = 2
 }
 
-export const initState = {
+export const initCalculatorState = {
     costMoney: '',  // 计算的金额
     isShowDigitalInput: false,  // 是否显示金额计算器
-    doneButtonState: DoneButtonState.DONE  // 完成按钮显示状态
+    doneButtonState: DoneButtonState.DONE, // 完成按钮显示状态
+    data: [] // cost money 数组
 };
+
 
 enum OperationType {
     OPERARION_ADD = 1,
@@ -20,7 +23,7 @@ enum OperationType {
 
 const operationSymbols = [ '+', '-' ];
 
-export default function reducer(state: any, action: any) {
+export default function reducer(state: any, action: Action) {
     const { type, payload } = action || {};
     switch (type) {
         case ACTION_HOME_DEAL_INPUT:
@@ -29,6 +32,16 @@ export default function reducer(state: any, action: any) {
         case ACTION_REFRESH_DIGITAL_INPUT_STATE:
             const { isShow } = payload || {};
             return { ...state, isShowDigitalInput: isShow };
+        case ACTION_REFRESH_COST_LIST:
+            const { data } = payload || {};
+            return { ...state, data };
+        case ACTION_ADD_COST_ITEM:
+            const { item } = payload || {};
+            const { data: originalData } = state || {};
+            originalData.splice(0, 0, item);
+            return { ...state, data: originalData };
+        case ACTION_INIT_COST_MONEY:
+            return { ...state, costMoney: '' };
     }
 }
 

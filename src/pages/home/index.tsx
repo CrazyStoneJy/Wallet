@@ -1,13 +1,19 @@
-import { Modal, StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList, Button } from "react-native";
-import { FlexableModal, FlexableType } from "../../components/FlexableModal";
-import { useEffect, useReducer, useState } from "react";
+import { StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList, Button, Keyboard } from "react-native";
+import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import DigitalInput, { GridType } from "./components/digital_input";
-import calulatorReducer, { DoneButtonState, initState } from './calulator_reducer';
-import { ACTION_HOME_DEAL_INPUT, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
+import calulatorReducer, { DoneButtonState, initCalculatorState, initState } from './calulator_reducer';
+import { ACTION_ADD_COST_ITEM, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 import sqliteHelper from "../../db/internal/sqlite_helper";
 import dao from "../../db/internal/storage_access_manager";
-import { TABLE_COST } from "../../db/consts";
+import { CostType, TABLE_COST } from "../../db/consts";
 import costStorageManager from "../../db/cost_storage_manager";
+import { safeParseFloat } from "../../utils/safe_invoker";
+import { TextInput } from "react-native-gesture-handler";
+import FlexableBottomSheet, { FlexableType } from "../../components/flexable_bottom_sheet";
+import xLog from "../../utils/logs";
+import { initHomeState } from "./home_reducer";
+import useCombinedReducers from "use-combined-reducers";
+import homeReducer from "./home_reducer";
 
 // >>>>>> const area start >>>>>>>
 
@@ -17,12 +23,32 @@ const BUTTON_SIZE = 50;
 
 function HomePage() {
 
-    const [ state, dispatch ] = useReducer(calulatorReducer, initState);
-    const { costMoney, isShowDigitalInput, doneButtonState } = state || {};
-     
+    const [ state, dispatch ] = useCombinedReducers({
+        homeState: useReducer(homeReducer, initHomeState),
+        calculatorState: useReducer(calulatorReducer, initCalculatorState),
+    });;
+    const { homeState, calculatorState } = state || {};
+    const { costMoney, isShowDigitalInput, doneButtonState, data } = calculatorState || {};
+    const bottomSheetRef = useRef(null);
 
     useEffect(() => {
-        costStorageManager.createTable();
+        costStorageManager.queryAll((result: []) => {
+            dispatch({ type: ACTION_REFRESH_COST_LIST, payload: {
+                data: result
+            } });
+        });
+        const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
+            xLog.log('Keyboard Shown');
+            bottomSheetRef.current?.snapToIndex(1);
+        });
+        const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+            xLog.log('Keyboard Hidden');
+            bottomSheetRef.current?.snapToIndex(0);
+        });
+        return () => {
+            showSubscription.remove();
+            hideSubscription.remove();
+        };
     }, []);
 
     function _renderAddButton() {
@@ -40,59 +66,32 @@ function HomePage() {
         );
     }
 
-    function _renderModal() {
-        // return _renderModalContent();
-        return (
-            <FlexableModal
-                visible={isShowDigitalInput}
-                type={FlexableType.FLEX}
-                children={_renderModalContent()}
-                onClose={() => {
-                    dispatch({ type: ACTION_REFRESH_DIGITAL_INPUT_STATE, payload: { isShow: false } });
-                }}
-            /> 
-        );
-    }
-
-    function _renderModalContent() {
-        const doneText = doneButtonState === DoneButtonState.DONE ? "完成" : "=";
-        return (
-            <View style={{ flexDirection: 'column', width: '100%' }}>
-                <View style={{ flexDirection: 'row', justifyContent: 'flex-end', marginHorizontal: 20, marginBottom: 10 }}>
-                    <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
-                </View>
-                <DigitalInput 
-                    doneText={doneText}
-                    onClickCallback={(gridType: GridType, text: string) => {
-                        dispatch({ type: ACTION_HOME_DEAL_INPUT, payload: { gridType } });
-                        if (gridType === GridType.GRID_DONE && doneButtonState === DoneButtonState.DONE) {
-                            // Alert.alert("costMoney: " + costMoney);
-                        }
-                    }}
-                />
-            </View>
-        );
-    }
-
     function _renderCostListItem({ item, index }: any ) {
+        const { cost, desc, type, timestamp } = item || {};
         return (
-            <View style={{ flexDirection: 'row' }}>
-                <Text></Text>    
+            <View style={{ flexDirection: 'row', height: 50, width: '100%', alignItems: 'center', backgroundColor: 'orange', marginBottom: 10 }} key={`item_${index}`}>
+                <View style={{ flex: 1 }}>
+                    <Text style={{ marginLeft: 15 }}>{desc}</Text>
+                </View>
+                <Text style={{ marginRight: 10 }}>{"-" + cost}</Text>
             </View>
         );
     }
 
     function _renderCostListByDay() {
+        if (!data) {
+            return;
+        }
         return (
-            <View style={{ flex: 1, flexDirection: 'column' }}>
-                <FlatList data={[]} renderItem={_renderCostListItem}/>
+            <View style={{ flex: 1, flexDirection: 'column', marginTop: 10, width: '100%' }}>
+                <FlatList data={data} renderItem={_renderCostListItem}/>
             </View>
         );
     }
 
-    return (
-        <View style={styles.style_home_container}>
-            <View style={{ marginTop: 50, flexDirection: 'row' }}>
+    function _rendetDBTestCaseView() {
+        return (
+            <View style={{ position: 'absolute', bottom: 200, flexDirection: 'row' }}>
                 <Button title="insert" onPress={() => {
                         // timestamp: number;
                         // cost: number;
@@ -108,10 +107,80 @@ function HomePage() {
                         // type: CostType;
                     sqliteHelper.dropTable(TABLE_COST);
                 }}/>
+                <View style={{ marginRight: 10 }}></View>
+                <Button title="query" onPress={() => {
+                        // timestamp: number;
+                        // cost: number;
+                        // desc: string;
+                        // type: CostType;
+                    costStorageManager.queryAll((result: []) => {
+                        // console.log("rseult: ", result);
+                    });
+                }}/>
             </View>
+        );
+    }
+
+    function _renderBottomSheetContent() {
+        const doneText = doneButtonState === DoneButtonState.DONE ? "完成" : "=";
+        return (
+            <View style={{ flexDirection: 'column', width: '100%' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center',  marginHorizontal: 20, marginBottom: 10, height: 40 }}>
+                    <View style={{ flexDirection: 'row', flex: 1, height: 40, alignItems: 'center' }}>
+                        <Text>描述：</Text>
+                        <TextInput 
+                            placeholder="请输入"
+                            onSubmitEditing={Keyboard.dismiss}
+                        />
+                    </View>
+                    <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
+                </View>
+                <DigitalInput 
+                    doneText={doneText}
+                    onClickCallback={(gridType: GridType, text: string) => {
+                        dispatch({ type: ACTION_HOME_DEAL_INPUT, payload: { gridType } });
+                        if (gridType === GridType.GRID_DONE && doneButtonState === DoneButtonState.DONE) {
+                            const item = {
+                                desc: 'desc',
+                                type: CostType.SHOPPING,
+                                cost: safeParseFloat(costMoney),
+                                timestamp: Date.now()
+                            };
+                            // refresh ui
+                            dispatch({ type: ACTION_ADD_COST_ITEM, payload: { item } });
+                            dispatch({ type: ACTION_INIT_COST_MONEY });
+                            // to store database
+                            costStorageManager.insert(item);
+                        }
+                    }}
+                />
+            </View>
+        );
+    }
+
+    function _renderBottomSheet() {
+        return (
+            <FlexableBottomSheet 
+                setRefCallback={(_ref: any) => {
+                    bottomSheetRef.current = _ref;
+                }}
+                snapToPercent={'67%'}
+                visible={isShowDigitalInput}
+                type={FlexableType.FLEX_TO}
+                children={_renderBottomSheetContent()}
+                onClose={() => {
+                    dispatch({ type: ACTION_REFRESH_DIGITAL_INPUT_STATE, payload: { isShow: false } });
+                }}
+            />
+        );
+    }
+
+    return (
+        <View style={styles.style_home_container}>
             {_renderCostListByDay()}
-            {_renderModal()}
-            {_renderAddButton()}
+            {_renderAddButton()} 
+            {_rendetDBTestCaseView()}
+            {_renderBottomSheet()}
         </View>
     );
 }

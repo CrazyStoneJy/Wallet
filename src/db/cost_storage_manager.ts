@@ -1,3 +1,4 @@
+import xLog from "../utils/logs";
 import { CostEnity, TABLE_COST } from "./consts";
 import sqliteHelper from "./internal/sqlite_helper";
 import dao from "./internal/storage_access_manager";
@@ -32,9 +33,26 @@ function CostStorageManager() {
         dao.insertData(TABLE_COST, ['cost', 'desc', 'type', 'timestamp'], [cost, desc, type, timestamp]);
     }
 
-    function queryAll() {
-        const sqlString = `SELECT`;
-        dao.queryData(sqlString, []);
+    function queryAll(callback: Function) {
+        const sqlString = `SELECT desc, type, cost, timestamp from ${TABLE_COST} ORDER BY timestamp DESC;`;
+        dao.queryData(sqlString, [], (results: any) => {
+            let array = [];
+            const { rows } = results || {};
+            const len = rows.length || 0;
+            for (let i = 0; i < len; i++) {
+                let row = results.rows.item(i);
+                const { cost, desc, type, timestamp } = row || {};
+                xLog.logDB('row: ', row);
+                const entity = {
+                    cost,
+                    desc,
+                    type,
+                    timestamp
+                }
+                array.push(entity);
+            }
+            callback && callback(array);
+        });
     }
 
     return {
