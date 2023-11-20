@@ -12,6 +12,7 @@ import { TextInput } from "react-native-gesture-handler";
 import FlexableBottomSheet, { FlexableType } from "../../components/flexable_bottom_sheet";
 import xLog from "../../utils/logs";
 import { homeReducer, initHomeState } from "./home_reducer";
+import { useNavigation } from "@react-navigation/native";
 
 // >>>>>> const area start >>>>>>>
 
@@ -25,6 +26,7 @@ function HomePage() {
     const { costMoney, isShowDigitalInput, doneButtonState, desc } = state || {};
     const { data } = state || {};
     const bottomSheetRef = useRef(null);
+    const navigation = useNavigation();
 
     useEffect(() => {
         costStorageManager.queryAll((result: []) => {
@@ -112,6 +114,9 @@ function HomePage() {
                     costStorageManager.queryAll((result: []) => {
                         // console.log("rseult: ", result);
                     });
+                }}/>
+                <Button title="go to chat" onPress={() => {
+                    navigation.navigate('Chat');
                 }}/>
             </View>
         );
