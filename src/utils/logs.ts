@@ -10,7 +10,7 @@ const defaulutInfo = {
 }
 
 const taskInfo = {
-    isDebug: true,
+    isDebug: false,
     tag: 'task'
 };
 

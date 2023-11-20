@@ -1,7 +1,8 @@
 import BottomSheet, { BottomSheetView, TouchableOpacity } from '@gorhom/bottom-sheet';
-import {useCallback, useMemo, useRef} from 'react';
-import {Button, Text, View, useWindowDimensions} from 'react-native';
+import {useCallback, useMemo, useRef, useState} from 'react';
+import {Button, KeyboardAvoidingView, Text, View, useWindowDimensions} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import xLog from '../utils/logs';
 
 interface FlexableBottomSheetProps {
     visible: boolean;
@@ -29,6 +30,7 @@ function FlexableBottomSheet(props: FlexableBottomSheetProps) {
     const { height: screenHeight } = useWindowDimensions();
     const DEFAULT_MAX_HEIGHT = 0.8 * screenHeight;
     const DEAULT_FIX_HEIGHT = 0.3 * screenHeight;
+    const [contentHeight, setContentHeight] = useState(0);
 
     // ref
     const bottomSheetRef = useRef<BottomSheet>(null);
@@ -89,36 +91,45 @@ function FlexableBottomSheet(props: FlexableBottomSheetProps) {
 
     return visible ? (
         <GestureHandlerRootView
-            style={{flex: 1, width: '100%', position: 'absolute', height: '100%'}}>
-            <TouchableOpacity 
-                activeOpacity={1} 
-                style={{ backgroundColor: 'transparent', height: '100%', width: '100%' }} 
-                onPress={() => {
-                    // _close();
-                }}    
-            >
-                <View
-                    style={{
-                        height: '100%',
-                        backgroundColor: '#00000099',
-                        width: '100%',
-                    }}>
-                    <BottomSheet
-                        ref={setRef}
-                        onChange={handleSheetChanges}
-                        handleIndicatorStyle={{ backgroundColor: '#8F8F8F', height: 4, width: 34 }}
-                        enablePanDownToClose={true}
-                        onClose={() => {
-                            _close();
-                        }}
-                        {...getConfigByType()}
-                    >
-                        <BottomSheetView>
+            style={{flex: 1, width: '100%', position: 'absolute', height: '100%', backgroundColor: 'transparent'}}>
+            <View
+                style={{
+                    height: '100%',
+                    backgroundColor: '#00000099',
+                    width: '100%',
+                    flexDirection: 'column'
+                }}>
+                {/* <TouchableOpacity 
+                    activeOpacity={1} 
+                    style={{ backgroundColor: 'transaprent', height: (contentHeight === 0 ? 0 : screenHeight - contentHeight), width: '100%' }} 
+                    onPress={() => {
+                        // _close();
+                    }}
+                /> */}
+                <BottomSheet
+                    ref={setRef}
+                    onChange={handleSheetChanges}
+                    handleIndicatorStyle={{ backgroundColor: '#8F8F8F', height: 4, width: 34 }}
+                    enablePanDownToClose={true}
+                    onClose={() => {
+                        _close();
+                    }}
+                    {...getConfigByType()}
+                >
+                    <BottomSheetView>
+                        <View 
+                            onLayout={(e: any) => {
+                                const { nativeEvent } = e || {};
+                                const { layout } = nativeEvent || {};
+                                const { height } = layout || {};
+                                // xLog.log('height: ', height);
+                                setContentHeight(height);
+                        }}>
                             {children}
-                        </BottomSheetView>
-                    </BottomSheet>
-                </View>
-            </TouchableOpacity>
+                        </View>
+                    </BottomSheetView>
+                </BottomSheet>
+            </View>
         </GestureHandlerRootView>
     ) : null;
 }

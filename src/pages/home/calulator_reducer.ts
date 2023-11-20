@@ -1,20 +1,13 @@
+import { Action } from "../../types/action";
+import xLog from "../../utils/logs";
 import { safeParseFloat } from "../../utils/safe_invoker";
-import { ACTION_ADD_COST_ITEM, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
+import { ACTION_ADD_COST_ITEM, ACTION_CHANGE_DESC, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 import { GridType } from "./components/digital_input";
-import { Action } from "./home_reducer";
 
 export enum DoneButtonState {
     CALCULATE = 1,
     DONE = 2
 }
-
-export const initCalculatorState = {
-    costMoney: '',  // 计算的金额
-    isShowDigitalInput: false,  // 是否显示金额计算器
-    doneButtonState: DoneButtonState.DONE, // 完成按钮显示状态
-    data: [] // cost money 数组
-};
-
 
 enum OperationType {
     OPERARION_ADD = 1,
@@ -25,6 +18,7 @@ const operationSymbols = [ '+', '-' ];
 
 export default function reducer(state: any, action: Action) {
     const { type, payload } = action || {};
+    xLog.log('calculator type: ', type, ', payload: ', payload, 'state: ', JSON.stringify(state));
     switch (type) {
         case ACTION_HOME_DEAL_INPUT:
             const dealedState = dealInput(state, payload);
@@ -32,16 +26,11 @@ export default function reducer(state: any, action: Action) {
         case ACTION_REFRESH_DIGITAL_INPUT_STATE:
             const { isShow } = payload || {};
             return { ...state, isShowDigitalInput: isShow };
-        case ACTION_REFRESH_COST_LIST:
-            const { data } = payload || {};
-            return { ...state, data };
-        case ACTION_ADD_COST_ITEM:
-            const { item } = payload || {};
-            const { data: originalData } = state || {};
-            originalData.splice(0, 0, item);
-            return { ...state, data: originalData };
         case ACTION_INIT_COST_MONEY:
-            return { ...state, costMoney: '' };
+            return { ...state, costMoney: ''};
+        case ACTION_CHANGE_DESC:
+            const { desc } = payload || {};
+            return { ...state, desc };
     }
 }
 
@@ -71,8 +60,7 @@ function dealInput(state: any, payload: any) {
         case GridType.GRID_DONE:
             const { doneButtonState } = state || {};
             if (doneButtonState === DoneButtonState.DONE) {
-                isShowDigitalInput = false;
-                return { ...state, isShowDigitalInput };
+                return { ...state, isShowDigitalInput: false };
             } else {
                 costMoney = calulateOperation(costMoney);
                 return { ...state, costMoney, doneButtonState: DoneButtonState.DONE };
@@ -193,6 +181,9 @@ function calculate(num1: number, num2: number, symbol: string) {
 }
 
 function hasOperationSymbol(costMoney: string) {
+    if (!costMoney) {
+        return false;
+    }
     return operationSymbols.some((symbol: string) => {
         return costMoney.indexOf(symbol) >= 0;
     })

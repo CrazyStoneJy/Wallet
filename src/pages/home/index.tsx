@@ -1,8 +1,8 @@
-import { StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList, Button, Keyboard } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, Alert, SectionList, FlatList, Button, Keyboard, KeyboardAvoidingView } from "react-native";
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from "react";
 import DigitalInput, { GridType } from "./components/digital_input";
-import calulatorReducer, { DoneButtonState, initCalculatorState, initState } from './calulator_reducer';
-import { ACTION_ADD_COST_ITEM, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
+import calulatorReducer, { DoneButtonState } from './calulator_reducer';
+import { ACTION_ADD_COST_ITEM, ACTION_CHANGE_DESC, ACTION_HOME_DEAL_INPUT, ACTION_INIT_COST_MONEY, ACTION_REFRESH_COST_LIST, ACTION_REFRESH_DIGITAL_INPUT_STATE } from "./action";
 import sqliteHelper from "../../db/internal/sqlite_helper";
 import dao from "../../db/internal/storage_access_manager";
 import { CostType, TABLE_COST } from "../../db/consts";
@@ -11,9 +11,7 @@ import { safeParseFloat } from "../../utils/safe_invoker";
 import { TextInput } from "react-native-gesture-handler";
 import FlexableBottomSheet, { FlexableType } from "../../components/flexable_bottom_sheet";
 import xLog from "../../utils/logs";
-import { initHomeState } from "./home_reducer";
-import useCombinedReducers from "use-combined-reducers";
-import homeReducer from "./home_reducer";
+import { homeReducer, initHomeState } from "./home_reducer";
 
 // >>>>>> const area start >>>>>>>
 
@@ -23,12 +21,9 @@ const BUTTON_SIZE = 50;
 
 function HomePage() {
 
-    const [ state, dispatch ] = useCombinedReducers({
-        homeState: useReducer(homeReducer, initHomeState),
-        calculatorState: useReducer(calulatorReducer, initCalculatorState),
-    });;
-    const { homeState, calculatorState } = state || {};
-    const { costMoney, isShowDigitalInput, doneButtonState, data } = calculatorState || {};
+    const [ state, dispatch ] = useReducer(homeReducer, initHomeState);
+    const { costMoney, isShowDigitalInput, doneButtonState, desc } = state || {};
+    const { data } = state || {};
     const bottomSheetRef = useRef(null);
 
     useEffect(() => {
@@ -68,6 +63,7 @@ function HomePage() {
 
     function _renderCostListItem({ item, index }: any ) {
         const { cost, desc, type, timestamp } = item || {};
+        xLog.log('item:', item);
         return (
             <View style={{ flexDirection: 'row', height: 50, width: '100%', alignItems: 'center', backgroundColor: 'orange', marginBottom: 10 }} key={`item_${index}`}>
                 <View style={{ flex: 1 }}>
@@ -131,6 +127,10 @@ function HomePage() {
                         <TextInput 
                             placeholder="请输入"
                             onSubmitEditing={Keyboard.dismiss}
+                            onChangeText={(text: string) => {
+                                xLog.log('text:', text);
+                                dispatch({ type: ACTION_CHANGE_DESC, payload: { desc: text } });
+                            }}
                         />
                     </View>
                     <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
@@ -141,7 +141,7 @@ function HomePage() {
                         dispatch({ type: ACTION_HOME_DEAL_INPUT, payload: { gridType } });
                         if (gridType === GridType.GRID_DONE && doneButtonState === DoneButtonState.DONE) {
                             const item = {
-                                desc: 'desc',
+                                desc,
                                 type: CostType.SHOPPING,
                                 cost: safeParseFloat(costMoney),
                                 timestamp: Date.now()
@@ -164,7 +164,7 @@ function HomePage() {
                 setRefCallback={(_ref: any) => {
                     bottomSheetRef.current = _ref;
                 }}
-                snapToPercent={'67%'}
+                snapToPercent={'50%'}
                 visible={isShowDigitalInput}
                 type={FlexableType.FLEX_TO}
                 children={_renderBottomSheetContent()}
