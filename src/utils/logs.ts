@@ -1,6 +1,6 @@
 
 const dbLogInfo = {
-    isDebug: false,
+    isDebug: true,
     tag: 'db'
 };
 
@@ -10,7 +10,7 @@ const defaulutInfo = {
 }
 
 const taskInfo = {
-    isDebug: false,
+    isDebug: true,
     tag: 'task'
 };
 

@@ -15,7 +15,7 @@ function CostStorageManager() {
             type: CostType;
         }
      */
-    function createTable() {
+    async function createTable() {
         const sqlString = `CREATE TABLE IF NOT EXISTS ${TABLE_COST} ( 
             ${TABLE_COST_INFO.ID} INTEGER PRIMARY KEY NOT NULL, 
             ${TABLE_COST_INFO.COST} FLOAT, 
@@ -23,7 +23,14 @@ function CostStorageManager() {
             ${TABLE_COST_INFO.TYPE} INTEGER,
             ${TABLE_COST_INFO.STATE} INTEGER,
             ${TABLE_COST_INFO.TIMESTAMP} INTEGER ); `;
-        sqliteHelper.createTable(TABLE_COST, sqlString);
+        
+        return new Promise((resolve, reject) => {
+            sqliteHelper.createTable(TABLE_COST, sqlString, () => {
+                resolve('success');
+            }, (error: any) => {
+                reject(error);
+            });
+        });
     }
 
     function insert(enity: CostEnity) {

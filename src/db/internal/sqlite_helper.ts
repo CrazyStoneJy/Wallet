@@ -25,7 +25,7 @@ function Sqlite3Helper() {
         db.close(() => {
             xLog.logDB("close database success");
         }, (error: any) => {
-            console.log("close database failure error:", error);
+            xLog.logDB("close database failure error:", error);
         });
     }
 
@@ -64,15 +64,17 @@ function Sqlite3Helper() {
         console.log(" todo gettables");
     }
 
-    function createTable(tableName: string, sqlString: string) {
+    function createTable(tableName: string, sqlString: string, successCallback?: Function, failureCallback?: Function) {
         xLog.logDB(`create table ${tableName} `, sqlString);
         if (!db) {
             connect((_db: any) => {
                 db.executeSql(sqlString, [], 
                     () => {
                         xLog.logDB(`create table ${tableName} successfully. `);
+                        successCallback && successCallback();
                     }, (error: any) => {
                         xLog.logDB(`create table ${tableName} occur error, error info:`, error);
+                        failureCallback && failureCallback(error);
                     });
             })
             return;
@@ -80,8 +82,10 @@ function Sqlite3Helper() {
         db.executeSql(sqlString, [], 
             () => {
                 xLog.logDB(`create table ${tableName} successfully. `);
+                successCallback && successCallback();
             }, (error: any) => {
                 xLog.logDB(`create table ${tableName} occur error, error info:`, error);
+                failureCallback && failureCallback(error);
             });
     }
 

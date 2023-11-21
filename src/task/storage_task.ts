@@ -11,9 +11,31 @@ export class StorageTask extends Task {
 
     run(): Promise<ITask | number> {
         xLog.logT("storage task run.");
-        costStorageManager.createTable();
-        return Promise.resolve(new StorageChildTask());
+        return new Promise(async (resolve, reject) => {
+            xLog.logT(">>> storage task promise");
+            await this.initOrUpgradeTable();
+            xLog.logT(">>> storage task promise execute success");
+            resolve('success');
+        })
+        .then(() => {
+            return new StorageChildTask().run();
+        });
     }
+
+    async initOrUpgradeTable() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                await costStorageManager.createTable();
+                // add some tables.
+
+                resolve('success');
+            } catch (error) {
+                reject(`init or upgrade table occur error: ${error}`);
+                xLog.logT("init or upgrade table occur error: ", error);
+            }
+        });
+    }
+
 }
 
 class StorageChildTask extends Task {
@@ -26,8 +48,8 @@ class StorageChildTask extends Task {
 
     run(): Promise<ITask | number> {
         xLog.logT("storage child task run.");
-        console.log("child task running....");
-        return Promise.resolve(new NoopTask());
+        // console.log("child task running....");
+        return new NoopTask().run();
     }
 
 }

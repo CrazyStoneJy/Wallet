@@ -29,11 +29,12 @@ function HomePage() {
     const navigation = useNavigation();
 
     useEffect(() => {
-        costStorageManager.queryAll((result: []) => {
-            dispatch({ type: ACTION_REFRESH_COST_LIST, payload: {
-                data: result
-            } });
-        });
+        // todo
+        // costStorageManager.queryAll((result: []) => {
+        //     dispatch({ type: ACTION_REFRESH_COST_LIST, payload: {
+        //         data: result
+        //     } });
+        // });
         const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
             xLog.log('Keyboard Shown');
             bottomSheetRef.current?.snapToIndex(1);
@@ -45,6 +46,7 @@ function HomePage() {
         return () => {
             showSubscription.remove();
             hideSubscription.remove();
+            sqliteHelper && sqliteHelper.close();
         };
     }, []);
 

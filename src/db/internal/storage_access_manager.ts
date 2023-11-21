@@ -59,7 +59,7 @@ function StorageAccessManager() {
 
     function deleteData(sqlString: string) {
         xLog.logDB(`query sql string: ${sqlString}`);
-        xLog.logDB(`query parameters: `, parameters);
+        // xLog.logDB(`query parameters: `, parameters);
         sqliteHelper.getDB((db: any) => {
             db.executeSql(sqlString, [], (results: any) => {
                 xLog.logDB(`delete successfully.`);

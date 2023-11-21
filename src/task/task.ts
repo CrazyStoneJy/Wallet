@@ -88,7 +88,7 @@ export abstract class Task implements ITask {
     execute(): void {
         this.state = TaskState.RUNNING
         this.run()
-            .then((doneFlag: any) => {
+            .then(() => {
                 this.state = TaskState.DONE;
                 xLog.logT(`${this.taskName} finished successfully.`);
             })
@@ -98,7 +98,7 @@ export abstract class Task implements ITask {
     }
 
     run(): Promise<ITask | number> {
-        return Promise.resolve(new NoopTask());
+        return new NoopTask().run();
     }
 
     cancel(): void {
