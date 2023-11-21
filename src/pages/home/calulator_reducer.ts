@@ -18,7 +18,7 @@ const operationSymbols = [ '+', '-' ];
 
 export default function reducer(state: any, action: Action) {
     const { type, payload } = action || {};
-    xLog.log('calculator type: ', type, ', payload: ', payload, 'state: ', JSON.stringify(state));
+    // xLog.log('calculator type: ', type, ', payload: ', payload, 'state: ', JSON.stringify(state));
     switch (type) {
         case ACTION_HOME_DEAL_INPUT:
             const dealedState = dealInput(state, payload);

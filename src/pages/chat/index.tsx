@@ -21,6 +21,11 @@ function ChatPage() {
         return (
             <View style={{ height: 50, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginHorizontal: 20 }}>
                 <Text style={{ fontSize: 26, color: 'black' }}>Chat with AI</Text>
+                <TouchableOpacity onPress={() => {
+                    navigation.goBack();
+                }}>
+                    <Text>Back</Text>
+                </TouchableOpacity>
             </View>
         );
     }

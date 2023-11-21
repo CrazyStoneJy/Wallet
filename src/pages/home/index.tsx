@@ -65,7 +65,7 @@ function HomePage() {
 
     function _renderCostListItem({ item, index }: any ) {
         const { cost, desc, type, timestamp } = item || {};
-        xLog.log('item:', item);
+        // xLog.log('item:', item);
         return (
             <View style={{ flexDirection: 'row', height: 50, width: '100%', alignItems: 'center', backgroundColor: 'orange', marginBottom: 10 }} key={`item_${index}`}>
                 <View style={{ flex: 1 }}>
@@ -138,7 +138,16 @@ function HomePage() {
                             }}
                         />
                     </View>
-                    <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
+                    <TouchableOpacity 
+                        activeOpacity={1}
+                        style={{ paddingLeft: 20 }}
+                        onPress={() => {
+                        if (Keyboard.isVisible()) {
+                            Keyboard.dismiss();
+                        }
+                    }}>
+                        <Text style={{ fontSize: 25, fontWeight: '400' }}>{costMoney ? costMoney : 0}</Text>
+                    </TouchableOpacity>
                 </View>
                 <DigitalInput 
                     doneText={doneText}

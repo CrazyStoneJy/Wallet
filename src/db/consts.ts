@@ -7,15 +7,34 @@ const DB_SIZE = 200000;
 // table const
 const TABLE_COST = "table_cost";
 
+enum TABLE_COST_INFO {
+    ID = 'id',
+    COST = 'cost', // 花费金额
+    DESC = 'desc', // 花费详情
+    TYPE = 'type', // 花费类型 `COST_TYPE`
+    TIMESTAMP = 'timestamp', // 时间戳
+    STATE = 'state' // 状态 `CostState`
+}
+
+
+// modal const
 enum CostType {
     SHOPPING = 1,
     TRANSPORT = 2,
 }
+
+enum CostState {
+    INIT = 1,
+    DELETEd = -1,
+    UPDATED = 2,
+}
+
 export type CostEnity = {
     timestamp: number;
     cost: number;
     desc: string;
     type: CostType;
+    id: number;
 }
 
 export {
@@ -25,4 +44,6 @@ export {
     DB_VERSION,
     TABLE_COST ,
     CostType,
+    TABLE_COST_INFO,
+    CostState
 }

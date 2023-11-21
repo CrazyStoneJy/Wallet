@@ -1,6 +1,6 @@
 import BottomSheet, { BottomSheetView, TouchableOpacity } from '@gorhom/bottom-sheet';
 import {useCallback, useMemo, useRef, useState} from 'react';
-import {Button, KeyboardAvoidingView, Text, View, useWindowDimensions} from 'react-native';
+import {Button, Keyboard, KeyboardAvoidingView, Text, View, useWindowDimensions} from 'react-native';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import xLog from '../utils/logs';
 
@@ -86,7 +86,11 @@ function FlexableBottomSheet(props: FlexableBottomSheetProps) {
     }
 
     function _close() {
-        bottomSheetRef.current?.close();
+        if (Keyboard.isVisible()) {
+            Keyboard.dismiss();
+        } else {
+            bottomSheetRef.current?.close();
+        }
     }
 
     return visible ? (
@@ -99,18 +103,19 @@ function FlexableBottomSheet(props: FlexableBottomSheetProps) {
                     width: '100%',
                     flexDirection: 'column'
                 }}>
-                {/* <TouchableOpacity 
+                <TouchableOpacity 
                     activeOpacity={1} 
-                    style={{ backgroundColor: 'transaprent', height: (contentHeight === 0 ? 0 : screenHeight - contentHeight), width: '100%' }} 
+                    style={{ backgroundColor: 'transparent', height: (contentHeight === 0 ? 0 : screenHeight - contentHeight), width: '100%' }} 
                     onPress={() => {
-                        // _close();
+                        _close();
                     }}
-                /> */}
+                />
                 <BottomSheet
                     ref={setRef}
                     onChange={handleSheetChanges}
                     handleIndicatorStyle={{ backgroundColor: '#8F8F8F', height: 4, width: 34 }}
                     enablePanDownToClose={true}
+                    enableContentPanningGesture={false}
                     onClose={() => {
                         _close();
                     }}

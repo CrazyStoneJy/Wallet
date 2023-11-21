@@ -5,7 +5,7 @@ const dbLogInfo = {
 };
 
 const defaulutInfo = {
-    isDebug: true,
+    isDebug: false,
     tag: 'tag'
 }
 
