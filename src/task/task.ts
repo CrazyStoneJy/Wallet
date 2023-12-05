@@ -1,6 +1,6 @@
 // todo
 /**
- * implment an async task structure.
+ * to implement task graph like `alibaba alpha`
  */
 
 import xLog from "../utils/logs";
@@ -10,7 +10,6 @@ export interface ITask {
     // taskId: number;
     init(): void;
     run(): Promise<ITask | number>;
-    cancel(): void;  // TODO how to cancel Promise funtion
 }
 
 /**
@@ -65,7 +64,7 @@ export class TaskManager {
 }
 
 enum TaskState {
-    CANCEL = -1,
+    ERROR = -1,
     DEAFULT = 0,
     INITED = 1,
     RUNNING = 2,
@@ -88,21 +87,20 @@ export abstract class Task implements ITask {
     execute(): void {
         this.state = TaskState.RUNNING
         this.run()
-            .then(() => {
-                this.state = TaskState.DONE;
-                xLog.logT(`${this.taskName} finished successfully.`);
+            .then((res: ITask | number) => {
+                if (typeof res === 'number' && res === TASK_END_FLAG) {
+                    this.state = TaskState.DONE;
+                    xLog.logT(`${this.taskName} finished successfully.`);
+                }
             })
             .catch((error) => {
+                this.state = TaskState.ERROR;
                 xLog.logT(`${this.taskName} has been occure some error, `,error);
             })
     }
 
     run(): Promise<ITask | number> {
         return new NoopTask().run();
-    }
-
-    cancel(): void {
-        this.state = TaskState.CANCEL;
     }
 }
 

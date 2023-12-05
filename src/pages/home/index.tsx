@@ -13,6 +13,8 @@ import FlexableBottomSheet, { FlexableType } from "../../components/flexable_bot
 import xLog from "../../utils/logs";
 import { homeReducer, initHomeState } from "./home_reducer";
 import { useNavigation } from "@react-navigation/native";
+import { color_primary_color } from "../../colors";
+import LeftSwipeItem from "./components/swipe_left_item";
 
 // >>>>>> const area start >>>>>>>
 
@@ -30,11 +32,11 @@ function HomePage() {
 
     useEffect(() => {
         // todo
-        // costStorageManager.queryAll((result: []) => {
-        //     dispatch({ type: ACTION_REFRESH_COST_LIST, payload: {
-        //         data: result
-        //     } });
-        // });
+        costStorageManager.queryAll((result: []) => {
+            dispatch({ type: ACTION_REFRESH_COST_LIST, payload: {
+                data: result
+            } });
+        });
         const showSubscription = Keyboard.addListener('keyboardDidShow', () => {
             xLog.log('Keyboard Shown');
             bottomSheetRef.current?.snapToIndex(1);
@@ -53,12 +55,12 @@ function HomePage() {
     function _renderAddButton() {
         return (
             <TouchableOpacity 
-                style={{ position: 'absolute', bottom: 80, backgroundColor: 'red', right: 50, width: BUTTON_SIZE, height: BUTTON_SIZE }}
+                style={{ position: 'absolute', bottom: 80, right: 50, width: BUTTON_SIZE, height: BUTTON_SIZE }}
                 onPress={() => {
                     dispatch({ type: ACTION_REFRESH_DIGITAL_INPUT_STATE, payload: { isShow: true } });
                 }}
             >
-                <View style={{ backgroundColor: 'yellow', height: BUTTON_SIZE, width: BUTTON_SIZE, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', borderRadius: BUTTON_SIZE / 2 }}>
+                <View style={{ backgroundColor: color_primary_color, height: BUTTON_SIZE, width: BUTTON_SIZE, flexDirection: 'column', justifyContent: 'center', alignItems: 'center', borderRadius: BUTTON_SIZE / 2 }}>
                     <Text style={{ color: 'black', fontSize: 40, fontWeight: '400' }}>+</Text>
                 </View>
             </TouchableOpacity>
@@ -69,12 +71,7 @@ function HomePage() {
         const { cost, desc, type, timestamp } = item || {};
         // xLog.log('item:', item);
         return (
-            <View style={{ flexDirection: 'row', height: 50, width: '100%', alignItems: 'center', backgroundColor: 'orange', marginBottom: 10 }} key={`item_${index}`}>
-                <View style={{ flex: 1 }}>
-                    <Text style={{ marginLeft: 15 }}>{desc}</Text>
-                </View>
-                <Text style={{ marginRight: 10 }}>{"-" + cost}</Text>
-            </View>
+            <LeftSwipeItem item={item} index={index}/>
         );
     }
 
@@ -156,10 +153,13 @@ function HomePage() {
                     onClickCallback={(gridType: GridType, text: string) => {
                         dispatch({ type: ACTION_HOME_DEAL_INPUT, payload: { gridType } });
                         if (gridType === GridType.GRID_DONE && doneButtonState === DoneButtonState.DONE) {
+                            if (!costMoney) {
+                                return;
+                            }
                             const item = {
                                 desc,
                                 type: CostType.SHOPPING,
-                                cost: safeParseFloat(costMoney),
+                                cost: costMoney ? safeParseFloat(costMoney) : 0,
                                 timestamp: Date.now()
                             };
                             // refresh ui

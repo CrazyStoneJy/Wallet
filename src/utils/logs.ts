@@ -1,16 +1,16 @@
 
 const dbLogInfo = {
-    isDebug: true,
+    isDebug: false,
     tag: 'db'
 };
 
 const defaulutInfo = {
-    isDebug: false,
+    isDebug: true,
     tag: 'tag'
 }
 
 const taskInfo = {
-    isDebug: true,
+    isDebug: false,
     tag: 'task'
 };
 

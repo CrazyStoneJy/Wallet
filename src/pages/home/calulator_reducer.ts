@@ -60,6 +60,9 @@ function dealInput(state: any, payload: any) {
         case GridType.GRID_DONE:
             const { doneButtonState } = state || {};
             if (doneButtonState === DoneButtonState.DONE) {
+                if (!costMoney) {
+                    return { ...state };
+                }
                 return { ...state, isShowDigitalInput: false };
             } else {
                 costMoney = calulateOperation(costMoney);

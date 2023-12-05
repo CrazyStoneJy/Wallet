@@ -34,7 +34,8 @@ export type CostEnity = {
     cost: number;
     desc: string;
     type: CostType;
-    id: number;
+    id?: number;
+    state?: number;
 }
 
 export {
