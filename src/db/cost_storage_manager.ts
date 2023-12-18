@@ -1,5 +1,6 @@
 import xLog from "../utils/logs";
 import { CostEnity, CostState, TABLE_COST, TABLE_COST_INFO } from "./consts";
+import { is_id } from "./internal/is";
 import sqliteHelper from "./internal/sqlite_helper";
 import dao from "./internal/storage_access_manager";
 
@@ -65,10 +66,24 @@ function CostStorageManager() {
         });
     }
 
+    /**
+     * represent it that make `state` to 
+     */
+    function deleteById(id: CostEnity['id']) {
+        if (!is_id(id)) {
+            return;
+        }
+        const sqlString = `UPDATE ${TABLE_COST} SET ${TABLE_COST_INFO.STATE} = ${CostState.DELETEd} WHERE ${TABLE_COST_INFO.ID} = ${id};`
+        dao.updateData(sqlString, (res: any) => {
+            xLog.logDB("update success, res: ", res);
+        });
+    }
+
     return {
         createTable,
         insert,
-        queryAll
+        queryAll,
+        deleteById
     }
 
 }

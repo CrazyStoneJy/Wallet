@@ -1,6 +1,6 @@
 
 const dbLogInfo = {
-    isDebug: false,
+    isDebug: true,
     tag: 'db'
 };
 

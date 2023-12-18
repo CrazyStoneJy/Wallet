@@ -1,5 +1,5 @@
 import { Alert, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from "react-native";
-import { color_divider, color_primary_color } from "../../../colors";
+import { color_divider, color_primary } from "../../../colors";
 
 const DIVIDER_WIDTH = 0.5;
 const ROW_HEIGHT = 60;
@@ -118,7 +118,7 @@ function DigitalInput(props: DigitalInputProps) {
             style_option = { fontSize: 25 };
         } 
         if (type === GridType.GRID_DONE){
-            style_container_option = { backgroundColor: color_primary_color };
+            style_container_option = { backgroundColor: color_primary };
             textContent = doneText;
         }
         

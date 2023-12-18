@@ -24,9 +24,9 @@ enum CostType {
 }
 
 enum CostState {
-    INIT = 1,
-    DELETEd = -1,
-    UPDATED = 2,
+    INIT = 1,  // 创建
+    DELETEd = -1,  // 删除
+    UPDATED = 2,  // 更新
 }
 
 export type CostEnity = {

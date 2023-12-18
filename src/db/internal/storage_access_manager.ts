@@ -70,8 +70,16 @@ function StorageAccessManager() {
         });
     }
 
-    function updateData() {
-
+    function updateData(sqlString: string, successCallback?: Function) {
+        xLog.logDB(`update sql string: ${sqlString}`);
+        sqliteHelper.getDB((db: any) => {
+            db.executeSql(sqlString, [], (results: any) => {
+                xLog.logDB(`update successfully.`);
+                successCallback && successCallback(results);
+            }, (error: any) => {
+                xLog.logDB(`update has been occur error, error info: `, error);
+            });
+        });
     }
 
     function queryData(sqlString: string, parameters: any[], successCallback: Function) {
