@@ -1,3 +1,4 @@
+// @ts-ignore
 import SQLite from 'react-native-sqlite-storage';
 import { DB_ALIAS_NAME, DB_NAME, DB_SIZE, DB_VERSION } from '../consts';
 import xLog from '../../utils/logs';
@@ -8,17 +9,27 @@ import xLog from '../../utils/logs';
  */
 function Sqlite3Helper() {
 
-    let db: any = null;
-    function connect(successCallback?: Function) {
-        db = SQLite.openDatabase(DB_NAME, DB_VERSION, DB_ALIAS_NAME, DB_SIZE, (_db: any) => {
-            xLog.logDB("open database success", _db);
+    let db_name = DB_NAME;
+    let db_alias_name = DB_ALIAS_NAME;
+    let db_version = DB_VERSION;
+    let db: SQLite.SQLitePlugin = null;
+
+    function setup_test(dbName: string) {
+        db_name = `${dbName}.db`;
+        db_alias_name = dbName;
+    }
+
+    function connect(successCallback: Function, failureCallback: Function): void {
+        db = SQLite.openDatabase(db_name, db_version, db_alias_name, DB_SIZE, (_db: any) => {
+            xLog.logDB("open database success");
             successCallback && successCallback(_db);
         }, (error: any) => {
             xLog.logDB("open database failure, error: ", error);
+            failureCallback && failureCallback(error);
         } );
     }
 
-    function close() {
+    function close(): void {
         if (!db) {
             return;
         }
@@ -29,85 +40,58 @@ function Sqlite3Helper() {
         });
     }
 
-    /**
-     * upgrade database
-     */
-    function upgrade() {
-        console.log(" todo upgrade");
-    }
-
-    function dropTable(tableName: string) {
-        if (!tableName) {
-            return;
-        }
-        if (!db) {
-            return;
-        }
+    async function dropTable(tableName: string): Promise<any> {
+        const _db = await getDB();
+        // todo check tablename is valid.
         const sqlString = `DROP TABLE IF EXISTS ${DB_ALIAS_NAME}.${tableName};`;
         xLog.logDB(`drop table sql: ${sqlString}`);
-        db.executeSql(sqlString, () => {
-            xLog.logDB(`drop table ${tableName} successfully.`);
-        }, (error: any) => {
-            xLog.logDB(`drop table ${tableName} occur error, error info: `, error);
-        });
-    }
-
-    function deleteDB() {
-        SQLite.deleteDatabase(DB_NAME, () => {
-            xLog.logDB("delete database success");
-        }, (error: any) => {
-            xLog.logDB("delete database error: ", error);
-        });
-    }
-
-    function getTables() {
-        console.log(" todo gettables");
-    }
-
-    function createTable(tableName: string, sqlString: string, successCallback?: Function, failureCallback?: Function) {
-        xLog.logDB(`create table ${tableName} `, sqlString);
-        if (!db) {
-            connect((_db: any) => {
-                db.executeSql(sqlString, [], 
-                    () => {
-                        xLog.logDB(`create table ${tableName} successfully. `);
-                        successCallback && successCallback();
-                    }, (error: any) => {
-                        xLog.logDB(`create table ${tableName} occur error, error info:`, error);
-                        failureCallback && failureCallback(error);
-                    });
-            })
-            return;
-        }
-        db.executeSql(sqlString, [], 
-            () => {
-                xLog.logDB(`create table ${tableName} successfully. `);
-                successCallback && successCallback();
+        return new Promise((resolve, reject) => {
+            _db.executeSql(sqlString, (res: any) => {
+                xLog.logDB(`drop table ${tableName} successfully.`);
+                resolve(res);
             }, (error: any) => {
-                xLog.logDB(`create table ${tableName} occur error, error info:`, error);
-                failureCallback && failureCallback(error);
+                xLog.logDB(`drop table ${tableName} occur error, error info: `, error);
+                reject(error);
             });
+        });
     }
 
-    function getDB(callback: Function) {
-        if (!db) {
-            connect((_db: any) => {
-                callback && callback(_db);
-            });
-        } else {
-            callback && callback(db);
-        }
+    async function createTable(tableName: string, sqlString: string): Promise<any> {
+        const _db = await getDB();
+        xLog.logDB(`create table ${tableName} `, sqlString);
+        return new Promise((resolve, reject) => {
+            _db.executeSql(sqlString, [], 
+                (res: any) => {
+                    xLog.logDB(`create table ${tableName} successfully`);
+                    resolve(res);
+                }, (error: any) => {
+                    xLog.logDB(`create table ${tableName} occur error, error info:`, error);
+                    reject(error);
+                });
+        });
+    }
+
+    function getDB(): Promise<SQLite.SQLitePlugin> {
+        return new Promise((resolve, reject) => {
+            if (!db) {
+                connect((_db: SQLite.SQLitePlugin) => {
+                    // callback && callback(_db);
+                    resolve(_db);
+                }, (error: any) => {
+                    reject(error);
+                });
+            } else {
+                resolve(db);
+            }
+        });
     }
 
     return {
-        connect,
         close,
-        upgrade,
         dropTable,
-        deleteDB,
-        getTables,
         getDB,
-        createTable 
+        createTable,
+        setup_test 
     }
 }
 

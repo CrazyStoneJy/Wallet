@@ -56,15 +56,14 @@ function HomePage() {
     const navigation = useNavigation();
 
     useEffect(() => {
-        // todo
-        costStorageManager.queryAll((result: []) => {
+        costStorageManager.queryAll().then((result: any) => {
             dispatch({
                 type: ACTION_REFRESH_COST_LIST,
                 payload: {
                     data: result,
                 },
             });
-        });
+        })
         const showSubscription = Keyboard.addListener("keyboardDidShow", () => {
             xLog.log("Keyboard Shown");
             // @ts-ignore

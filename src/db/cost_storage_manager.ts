@@ -1,8 +1,9 @@
 import xLog from "../utils/logs";
-import { CostEnity, CostState, TABLE_COST, TABLE_COST_INFO } from "./consts";
+import { CostState, TABLE_COST, TABLE_COST_INFO } from "./consts";
 import { is_id } from "./internal/is";
 import sqliteHelper from "./internal/sqlite_helper";
 import dao from "./internal/storage_access_manager";
+import { CostEnity } from "./types";
 
 function CostStorageManager() {
 
@@ -16,7 +17,7 @@ function CostStorageManager() {
             type: CostType;
         }
      */
-    async function createTable() {
+    async function createTable(): Promise<any> {
         const sqlString = `CREATE TABLE IF NOT EXISTS ${TABLE_COST} ( 
             ${TABLE_COST_INFO.ID} INTEGER PRIMARY KEY NOT NULL, 
             ${TABLE_COST_INFO.COST} FLOAT, 
@@ -24,34 +25,27 @@ function CostStorageManager() {
             ${TABLE_COST_INFO.TYPE} INTEGER,
             ${TABLE_COST_INFO.STATE} INTEGER,
             ${TABLE_COST_INFO.TIMESTAMP} INTEGER ); `;
-        
-        return new Promise((resolve, reject) => {
-            sqliteHelper.createTable(TABLE_COST, sqlString, () => {
-                resolve('success');
-            }, (error: any) => {
-                reject(error);
-            });
-        });
+        return sqliteHelper.createTable(TABLE_COST, sqlString);
     }
 
-    function insert(enity: CostEnity) {
+    function insert(enity: CostEnity): Promise<any> {
         if (!enity) {
-            return;
+            return Promise.reject('entity is null');
         }
         const { cost, type, desc, timestamp } = enity || {};
-        dao.insertData(TABLE_COST, [TABLE_COST_INFO.COST, TABLE_COST_INFO.DESC, TABLE_COST_INFO.TYPE, TABLE_COST_INFO.TIMESTAMP, TABLE_COST_INFO.STATE], [cost, desc, type, timestamp, CostState.INIT]);
+        return dao.insertData(TABLE_COST, [TABLE_COST_INFO.COST, TABLE_COST_INFO.DESC, TABLE_COST_INFO.TYPE, TABLE_COST_INFO.TIMESTAMP, TABLE_COST_INFO.STATE], [cost, desc, type, timestamp, CostState.INIT]);
     }
 
-    function queryAll(callback: Function) {
+    function queryAll(): Promise<any> {
         const sqlString = `SELECT * from ${TABLE_COST} ORDER BY timestamp DESC;`;
-        dao.queryData(sqlString, [], (results: any) => {
+        return dao.queryData(sqlString, []).then((results: any) => {
             let array = [];
             const { rows } = results || {};
             const len = rows.length || 0;
             for (let i = 0; i < len; i++) {
                 let row = results.rows.item(i);
                 const { cost, desc, type, timestamp, id, state } = row || {};
-                xLog.logDB('row: ', row);
+                // xLog.logDB('row: ', row);
                 const entity = {
                     cost,
                     desc,
@@ -62,21 +56,19 @@ function CostStorageManager() {
                 }
                 array.push(entity);
             }
-            callback && callback(array);
+            return Promise.resolve(array);
         });
     }
 
     /**
      * represent it that make `state` to 
      */
-    function deleteById(id: CostEnity['id']) {
+    function deleteById(id: CostEnity['id']): Promise<any> {
         if (!is_id(id)) {
-            return;
+            return Promise.reject(`is not a id`);
         }
         const sqlString = `UPDATE ${TABLE_COST} SET ${TABLE_COST_INFO.STATE} = ${CostState.DELETEd} WHERE ${TABLE_COST_INFO.ID} = ${id};`
-        dao.updateData(sqlString, (res: any) => {
-            xLog.logDB("update success, res: ", res);
-        });
+        return dao.updateData(sqlString);
     }
 
     return {

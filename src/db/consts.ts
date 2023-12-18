@@ -29,15 +29,6 @@ enum CostState {
     UPDATED = 2,  // 更新
 }
 
-export type CostEnity = {
-    timestamp: number;
-    cost: number;
-    desc: string;
-    type: CostType;
-    id?: number;
-    state?: number;
-}
-
 export {
     DB_NAME,
     DB_ALIAS_NAME,

@@ -39,7 +39,7 @@ function StorageAccessManager() {
         });
     }
 
-    function insertData(tableName: string, parameters: string[], values: any[]) {
+    async function insertData(tableName: string, parameters: string[], values: any[]): Promise<any> {
         if (!checkParameterAndValues(parameters, values)) {
             return;
         }
@@ -48,49 +48,57 @@ function StorageAccessManager() {
         const sqlString = `INSERT INTO 
             ${tableName} ${parameterStrings} VALUES ${valueStrings};`;
         xLog.logDB("inset sql string: ", sqlString);
-        sqliteHelper.getDB((db: any) => {
-            db.executeSql(sqlString, [], () => {
+        const _db = await sqliteHelper.getDB();
+        return new Promise((reoslve, reject) => {
+            _db.executeSql(sqlString, [], (res: any) => {
                 xLog.logDB(`insert table ${tableName} successfully.`);
+                reoslve(res);
             }, (error: any) => {
                 xLog.logDB(`insert table ${tableName} occur error, error info `, error);
+                reject(error);
             });
-        })
+        });
     }
 
-    function deleteData(sqlString: string) {
-        xLog.logDB(`query sql string: ${sqlString}`);
-        // xLog.logDB(`query parameters: `, parameters);
-        sqliteHelper.getDB((db: any) => {
-            db.executeSql(sqlString, [], (results: any) => {
+    async function deleteData(sqlString: string): Promise<any> {
+        xLog.logDB(`delete sql string: ${sqlString}`);
+        const _db = await sqliteHelper.getDB();
+        return new Promise((resolve, reject) => {
+            _db.executeSql(sqlString, [], (res: any) => {
                 xLog.logDB(`delete successfully.`);
-                // successCallback && successCallback(results);
+                resolve(res);
             }, (error: any) => {
                 xLog.logDB(`delete has been occur error, error info: `, error);
+                reject(error);
             });
         });
     }
 
-    function updateData(sqlString: string, successCallback?: Function) {
+    async function updateData(sqlString: string): Promise<any> {
         xLog.logDB(`update sql string: ${sqlString}`);
-        sqliteHelper.getDB((db: any) => {
-            db.executeSql(sqlString, [], (results: any) => {
+        const _db = await sqliteHelper.getDB();
+        return new Promise((resolve, reject) => {
+            _db.executeSql(sqlString, [], (res: any) => {
                 xLog.logDB(`update successfully.`);
-                successCallback && successCallback(results);
+                resolve(res);
             }, (error: any) => {
                 xLog.logDB(`update has been occur error, error info: `, error);
+                reject(error);
             });
         });
     }
 
-    function queryData(sqlString: string, parameters: any[], successCallback: Function) {
+    async function queryData(sqlString: string, parameters: any[]): Promise<any> {
         xLog.logDB(`query sql string: ${sqlString}`);
         xLog.logDB(`query parameters: `, parameters);
-        sqliteHelper.getDB((db: any) => {
-            db.executeSql(sqlString, [ ...parameters ], (results: any) => {
-                xLog.logDB(`query successfully.`);
-                successCallback && successCallback(results);
+        const _db = await sqliteHelper.getDB();
+        return new Promise((resolve, reject) => {
+            _db.executeSql(sqlString, [ ...parameters ], (res: any) => {
+                xLog.logDB(`query successfully, res: ${res}`);
+                resolve(res);
             }, (error: any) => {
                 xLog.logDB(`query has been occur error, error info: `, error);
+                reject(error);
             });
         });
     }
